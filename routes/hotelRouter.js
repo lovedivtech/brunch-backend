@@ -1,5 +1,5 @@
 import express from "express";
-import { validate } from "../middleware/validate.js";
+import { checkOwnerRole, validate } from "../middleware/validate.js";
 import { isAuthenticated } from "../utils/jwtToken.js";
 import {
   createHotelvalidator,
@@ -17,6 +17,7 @@ route.post(
   "/hotel-creation",
   isAuthenticated,
   validate(createHotelvalidator),
+  checkOwnerRole,
   createHotel
 );
 
@@ -30,6 +31,7 @@ route.put(
   "/hotel-update/:id",
   isAuthenticated,
   validate(updateHotelValidator),
+  checkOwnerRole,
   updateHotel
 );
 

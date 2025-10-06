@@ -27,3 +27,18 @@ export const validate = (schema) => async (req, res, next) => {
     });
   }
 };
+
+export const checkOwnerRole = (req, res, next) => {
+  const user = req.user;
+
+  if (!user || user.role !== "owner") {
+    return res.status(403).json({
+      success: false,
+      message: "Only owners can perform this action.",
+      data: [],
+      errors: [],
+    });
+  }
+
+  next();
+};
