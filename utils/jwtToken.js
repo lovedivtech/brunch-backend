@@ -51,7 +51,7 @@ export const JWTSignVerifyUserData = async function (user) {
       email: user.email,
       phoneNo: user.phoneNo,
       role: user.role,
-      licences: user.licences,
+      license: user.license,
       gstNo: user.gstNo,
     };
   } catch (error) {

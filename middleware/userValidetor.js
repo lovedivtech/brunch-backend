@@ -31,7 +31,7 @@ export const userSignupvalidator = Yup.object().shape({
     }),
 
   phoneNo: Yup.string()
-    .required("phone.no  is required")
+    .notRequired()
     .test(
       "is-valid-phone",
       "Phone number is invalid",
@@ -43,11 +43,11 @@ export const userSignupvalidator = Yup.object().shape({
     .default("user")
     .oneOf(roles, `Role must be one of: ${roles.join(", ")}`),
 
-  licences: Yup.mixed().when("role", {
+  license: Yup.mixed().when("role", {
     is: (role) => role === "admin" || role === "owner",
     then: (schema) =>
       schema.test(
-        "licences-required",
+        "license-required",
         "Select(false)",
         (value) => value !== undefined && value !== null && value !== ""
       ),

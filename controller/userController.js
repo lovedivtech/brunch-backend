@@ -26,7 +26,7 @@ export const signUp = async (req, res, next) => {
       password,
       phoneNo,
       role,
-      licences,
+      license,
       gstNo,
     } = req.body;
 
@@ -38,10 +38,15 @@ export const signUp = async (req, res, next) => {
       phoneNo,
       role,
       username: await ramdomUserName(firstName, lastName),
-      licences,
+      license,
       gstNo,
     });
     const userData = await JWTSignVerifyUserData(user);
+    await sendEmail({
+      to: user.email,
+      subject: `Successfully created Username.😚`,
+      text: `You are successfully registered on Brunch App.\n\nYour Username is: ${user.username}\n\nKeep it safe!`,
+    });
     res.status(201).json({
       success: true,
       user: userData,
