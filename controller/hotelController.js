@@ -60,3 +60,47 @@ export const viewHotelDetails = async (req, res) => {
     });
   }
 };
+
+export const updateHotel = async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (user.role !== "owner") {
+      return res.status(403).json({
+        success: false,
+        message: "Only owners can update hotels.",
+        data: [],
+        errors: [],
+      });
+    }
+    const hotelData = req.body;
+    hotelData.ownerId = await req.user._id;
+    const hotel = await Hotel.findByIdAndUpdate(req.params.id, hotelData, {
+      new: true,
+      select: "-__v -createdAt -updatedAt",
+    });
+    if (!hotel) {
+      return res.status(404).json({
+        success: false,
+        message: "Hotel not found",
+        data: [],
+        errors: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Hotel updated successfully",
+      hotel,
+      errors: [],
+    });
+  } catch (error) {
+    console.error("Hotel update error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Server error",
+      data: [],
+      error: [error.message],
+    });
+  }
+};
