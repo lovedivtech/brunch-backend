@@ -11,6 +11,7 @@ import {
   updateHotel,
   viewHotelDetails,
 } from "../controller/hotelController.js";
+import upload from "../middleware/multer.js";
 
 const route = express.Router();
 route.post(
@@ -18,6 +19,7 @@ route.post(
   isAuthenticated,
   validate(createHotelvalidator),
   checkOwnerRole,
+  upload.array("images", 10),
   createHotel
 );
 
