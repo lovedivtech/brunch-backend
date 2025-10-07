@@ -7,9 +7,9 @@ const menuSchema = mongoose.Schema(
     price: { type: Number, required: true },
     offer: { type: Number, default: 0 },
     category: [{ type: String, default: "" }],
-    // e.g., ["veg", "non-veg"]
 
     reviewCount: { type: Number, default: 0 },
+    rating: { type: Number, default: 0 },
 
     type: [
       {
@@ -50,11 +50,6 @@ const menuSchema = mongoose.Schema(
     ],
     available: { type: Boolean, default: true },
     image_url: { type: String, default: "" },
-    ownerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
-      required: true,
-    },
   },
   {
     timestamps: true,

@@ -7,6 +7,7 @@ import {
   getSingleMenu,
   updateMenu,
   deleteMenu,
+  favoriteMenu,
 } from "../controller/menuController.js";
 import {
   createMenuValidator,
@@ -26,6 +27,7 @@ route.post(
 );
 
 route.get("/all-menus", validate(viewAllMenuValidator), getAllMenu);
+route.get("/favorite-menus", favoriteMenu);
 route.get("/:id", validate(viewSingleMenuValidator), getSingleMenu);
 
 route.put(

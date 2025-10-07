@@ -46,6 +46,13 @@ export const createMenuValidator = yup.object().shape({
     .max(500, "Description must be at most 500 characters")
     .nullable(),
 
+  rating: yup
+    .number()
+    .typeError("Rating must be a number")
+    .min(0, "Rating cannot be negative")
+    .max(5, "Rating must be between 0 and 5")
+    .notRequired(),
+
   price: yup
     .number()
     .typeError("Price must be a number")

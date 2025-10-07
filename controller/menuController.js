@@ -1,14 +1,15 @@
 import Menu from "../models/menuModel.js";
+import { ApiFeatures } from "../utils/apiFunctionality.js";
 
 export const createMenu = async (req, res) => {
   try {
-    const menuData = { ...req.body, ownerId: req.user._id };
+    const menuData = { ...req.body };
     const menu = await Menu.create(menuData);
     const menuList = {
-      ownerId: menu.ownerId,
       id: menu._id,
       name: menu.name,
       description: menu.description,
+      rating: menu.rating,
       price: menu.price,
       offer: menu.offer,
       category: menu.category,
@@ -33,10 +34,10 @@ export const createMenu = async (req, res) => {
   }
 };
 
-////////////////////  getAllMenu  ////////////////////////
+////////////////////  getAllMenu (Pagination) ////////////////////////
 export const getAllMenu = async (req, res) => {
   try {
-    const menus = await Menu.find().select("-__v -createdAt -updatedAt");
+    const menus = Menu.find().select("-__v -createdAt -updatedAt");
     if (!menus) {
       return res.status(404).json({
         success: false,
@@ -45,10 +46,14 @@ export const getAllMenu = async (req, res) => {
         errors: [],
       });
     }
+    const apiFeatures = new ApiFeatures(menus, req.query).paginate();
+    const paginatedMenus = await apiFeatures.query;
+    console.log(paginatedMenus);
+
     return res.status(200).json({
       success: true,
       message: "Menu Find successfully",
-      data: menus,
+      data: paginatedMenus,
       errors: [],
     });
   } catch (error) {
@@ -106,7 +111,7 @@ export const updateMenu = async (req, res) => {
       });
     }
 
-    const menuData = { ...req.body, ownerId: req.user._id };
+    const menuData = { ...req.body };
     const updatedMenu = await Menu.findByIdAndUpdate(req.params.id, menuData, {
       new: true,
       select: "-__v -createdAt -updatedAt",
@@ -155,4 +160,32 @@ export const deleteMenu = async (req, res) => {
   }
 };
 
-export const favoriteMenu = async (req, res) => {};
+export const favoriteMenu = async (req, res) => {
+  try {
+    const menu = await Menu.find({ rating: { $gte: 4 } }).select(
+      "-__v -createdAt -updatedAt"
+    );
+    if (!menu || menu.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No favorite menus found",
+        data: [],
+        errors: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Favorite menus retrieved successfully",
+      data: menu,
+      errors: [],
+    });
+  } catch (errors) {
+    return res.status(500).json({
+      success: false,
+      error: "Server error",
+      data: [],
+      errors: [errors.message],
+    });
+  }
+};

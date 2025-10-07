@@ -1,10 +1,9 @@
 import Hotel from "../models/hotelModel.js";
 export const createHotel = async (req, res) => {
   try {
-    const hotelData = { ...req.body, ownerId: req.user._id };
+    const hotelData = { ...req.body };
     const hotel = await Hotel.create(hotelData);
     const hotelList = {
-      ownerId: hotel.ownerId,
       id: hotel._id,
       name: hotel.hotelName,
       openingTime: hotel.openingTime,
