@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
+
 const menuSchema = mongoose.Schema(
   {
-    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     name: { type: String },
     description: { type: String, default: "" },
     price: { type: Number, required: true },
     offer: { type: Number, default: 0 },
-    category: [{ type: String, default: "" }], // e.g., ["veg", "non-veg"]
+    category: [{ type: String, default: "" }],
+    // e.g., ["veg", "non-veg"]
+
+    reviewCount: { type: Number, default: 0 },
+
     type: [
       {
         type: String,
@@ -14,6 +18,8 @@ const menuSchema = mongoose.Schema(
           "punjabi",
           "chinese",
           "south-indian",
+          "north-indian",
+          "hyderabadi",
           "gujarati",
           "mughlai",
           "continental",
@@ -44,6 +50,11 @@ const menuSchema = mongoose.Schema(
     ],
     available: { type: Boolean, default: true },
     image_url: { type: String, default: "" },
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+    },
   },
   {
     timestamps: true,

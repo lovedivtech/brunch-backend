@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 const hotelSchema = mongoose.Schema(
   {
     hotelName: { type: String, default: "" },
+    openingTime: { type: String, default: "" },
+    closingTime: { type: String, default: "" },
+
     address: {
       street: { type: String, default: "" },
       city: { type: String, default: "" },

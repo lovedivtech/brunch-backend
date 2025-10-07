@@ -1,23 +1,35 @@
 import Hotel from "../models/hotelModel.js";
 export const createHotel = async (req, res) => {
   try {
-    const { hotelData } = req.body;
-    hotelData.ownerId = req.user._id;
+    const hotelData = { ...req.body, ownerId: req.user._id };
     const hotel = await Hotel.create(hotelData);
-
+    const hotelList = {
+      ownerId: hotel.ownerId,
+      id: hotel._id,
+      name: hotel.hotelName,
+      openingTime: hotel.openingTime,
+      closingTime: hotel.closingTime,
+      address: hotel.address,
+      category: hotel.category,
+      image_url: hotel.Images,
+      staff: hotel.staff,
+      vacancy: hotel.vacancy,
+      description: hotel.description,
+      rating: hotel.rating,
+    };
     return res.status(201).json({
       success: true,
       message: "Hotel created successfully",
-      hotel,
+      hotel: hotelList,
       errors: [],
     });
-  } catch (error) {
-    console.error("Hotel creation error:", error);
+  } catch (errors) {
+    console.error("Hotel creation error:", errors);
     return res.status(500).json({
       success: false,
       error: "Server error",
       data: [],
-      error: [error.message],
+      errors: [errors.message],
     });
   }
 };

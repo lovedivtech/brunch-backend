@@ -66,7 +66,7 @@ export const isAuthenticated = (req, res, next) => {
     return res.status(401).json({
       success: false,
       message: "Unauthorized: No token provided",
-      error: [error],
+      error: ["No token provided"],
       data: [],
     });
   }
@@ -77,19 +77,18 @@ export const isAuthenticated = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = {
-      id: decoded.id,
+      _id: decoded.id,
       email: decoded.email,
       role: decoded.role,
       username: decoded.username,
     };
 
     next();
-  } catch (error) {
-    console.error("JWT Auth Error:", error.message);
+  } catch (errors) {
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",
-      error: [error],
+      error: [errors],
       data: [],
     });
   }

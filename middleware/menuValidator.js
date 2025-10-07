@@ -1,11 +1,12 @@
-import mongoose from "mongoose";
 import * as yup from "yup";
-
+import Menu from "../models/menuModel.js";
 // Allowed cuisine types (same as in schema)
 const allowedTypes = [
   "punjabi",
   "chinese",
   "south-indian",
+  "north-indian",
+  "hyderabadi",
   "gujarati",
   "mughlai",
   "continental",
@@ -33,7 +34,6 @@ const allowedTypes = [
   "desserts",
 ];
 
-// Yup schema for creating a menu item
 export const createMenuValidator = yup.object().shape({
   name: yup
     .string()
@@ -50,11 +50,8 @@ export const createMenuValidator = yup.object().shape({
     .number()
     .typeError("Price must be a number")
     .positive("Price must be a positive number")
-    .required("Price is required")
-    .when("offer", {
-      is: (val) => val !== undefined && val !== null,
-      then: yup.number().required("Price is required when offer is present"),
-    }),
+    .required("Price is required"),
+
   offer: yup
     .number()
     .typeError("Offer must be a number")
@@ -85,3 +82,62 @@ export const createMenuValidator = yup.object().shape({
     .url("Image URL must be a valid URL")
     .required("Image URL is required"),
 });
+
+export const viewAllMenuValidator = yup
+  .object()
+  .shape({})
+  .test("menus-exist", "Menu not found", async () => {
+    const menus = await Menu.find();
+    return menus && menus.length > 0;
+  });
+
+export const viewSingleMenuValidator = yup.object().shape({});
+
+export const updateMenuValidator = yup.object().shape({
+  name: yup
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(80, "Name must be at most 80 characters")
+    .notRequired(),
+
+  description: yup
+    .string()
+    .max(500, "Description must be at most 500 characters")
+    .nullable()
+    .notRequired(),
+
+  price: yup
+    .number()
+    .typeError("Price must be a number")
+    .positive("Price must be a positive number")
+    .notRequired(),
+
+  offer: yup
+    .number()
+    .typeError("Offer must be a number")
+    .min(0, "Offer cannot be negative")
+    .max(yup.ref("price"), "Offer must be less than price")
+    .notRequired(),
+
+  category: yup
+    .array()
+    .of(
+      yup
+        .string()
+        .oneOf(["veg", "non-veg"], 'Category must be "veg" or "non-veg"')
+    )
+    .min(1, "At least one category is required")
+    .notRequired(),
+
+  type: yup
+    .array()
+    .of(yup.string().oneOf(allowedTypes, "Invalid cuisine type"))
+    .min(1, "At least one cuisine type is required")
+    .notRequired(),
+
+  available: yup.boolean().notRequired(),
+
+  image_url: yup.string().url("Image URL must be a valid URL").notRequired(),
+});
+
+export const deleteMenuValidator = yup.object().shape({});
