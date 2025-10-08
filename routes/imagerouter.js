@@ -3,7 +3,11 @@ import upload from "../middleware/multerMiddlware.js";
 import { checkOwnerRole } from "../middleware/validate.js";
 import { isAuthenticated } from "../utils/jwtToken.js";
 
-import { uploadImage } from "../controller/imageController.js";
+import {
+  getAllImages,
+  getImageById,
+  uploadImage,
+} from "../controller/imageController.js";
 
 const route = express.Router();
 
@@ -14,5 +18,9 @@ route.post(
   upload.single("image"),
   uploadImage
 );
+
+route.get("/All-images", getAllImages);
+
+route.get("/:id", getImageById);
 
 export default route;

@@ -12,7 +12,7 @@ export const createHotelvalidator = yup.object({
   street: yup.string().required("Street is required"),
   city: yup.string().required("City is required"),
   state: yup.string().required("State is required"),
-  zip: yup.string().required("ZIP code is required"),
+  pin: yup.string().required("pin code is required"),
   country: yup.string().required("Country is required"),
 
   category: yup.string().required("Category is required"),
@@ -56,7 +56,7 @@ export const updateHotelValidator = yup
     street: yup.string().required("Street is required"),
     city: yup.string().required("City is required"),
     state: yup.string().required("State is required"),
-    zip: yup.string().required("ZIP code is required"),
+    pin: yup.string().required("pin code is required"),
     country: yup.string().required("Country is required"),
 
     category: yup.string().required("Category is required"),

@@ -10,7 +10,7 @@ const hotelSchema = mongoose.Schema(
     street: { type: String, default: "" },
     city: { type: String, default: "" },
     state: { type: String, default: "" },
-    zip: { type: String, default: "" },
+    pin: { type: String, default: "" },
     country: { type: String, default: "" },
 
     category: { type: String, default: "" },

@@ -13,7 +13,7 @@ export const createHotel = async (req, res) => {
       street: hotel.street,
       city: hotel.city,
       state: hotel.state,
-      zip: hotel.zip,
+      pin: hotel.pin,
       country: hotel.country,
       category: hotel.category,
       image_url: hotel.image_url,
