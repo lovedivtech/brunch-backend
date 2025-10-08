@@ -1,4 +1,11 @@
 {
   "postman.settings.dotenv-detection-notification-visibility": false,
-  "cSpell.words": ["andhra", "goan", "hyderabadi", "maharashtrian", "mughlai"]
+  "cSpell.words": [
+    "andhra",
+    "goan",
+    "hyderabadi",
+    "imagekit",
+    "maharashtrian",
+    "mughlai"
+  ]
 }

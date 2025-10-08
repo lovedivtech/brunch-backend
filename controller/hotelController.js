@@ -1,18 +1,8 @@
 import Hotel from "../models/hotelModel.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
 export const createHotel = async (req, res) => {
   try {
-    if (req.files && req.files.length > 0) {
-      const imageUploadPromises = req.files.map((file) =>
-        uploadOnCloudinary(file.path)
-      );
-      const uploadedImages = await Promise.all(imageUploadPromises);
-      req.body.Images = uploadedImages.map((image) => image.url);
-    } else {
-      req.body.image_url = [];
-    }
-
-    const hotelData = { ...req.body, Images: req.body.Images };
+    const hotelData = { ...req.body };
     const hotel = await Hotel.create(hotelData);
     const hotelList = {
       id: hotel._id,
@@ -20,9 +10,13 @@ export const createHotel = async (req, res) => {
       openingTime: hotel.openingTime,
       closingTime: hotel.closingTime,
       address: hotel.address,
+      street: hotel.street,
+      city: hotel.city,
+      state: hotel.state,
+      zip: hotel.zip,
+      country: hotel.country,
       category: hotel.category,
       image_url: hotel.image_url,
-      staff: hotel.staff,
       vacancy: hotel.vacancy,
       description: hotel.description,
       rating: hotel.rating,
@@ -76,7 +70,6 @@ export const viewHotelDetails = async (req, res) => {
 export const updateHotel = async (req, res) => {
   try {
     const hotelData = req.body;
-    hotelData.ownerId = await req.user._id;
     const hotel = await Hotel.findByIdAndUpdate(req.params.id, hotelData, {
       new: true,
       select: "-__v -createdAt -updatedAt",

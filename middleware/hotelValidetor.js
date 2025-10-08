@@ -8,33 +8,19 @@ export const createHotelvalidator = yup.object({
     .min(3, "Hotel name must be at least 3 characters"),
   openingTime: yup.string().required("Opening time is required"),
   closingTime: yup.string().required("Closing time is required"),
-  address: yup.object({
-    street: yup.string().required("Street is required"),
-    city: yup.string().required("City is required"),
-    state: yup.string().required("State is required"),
-    zip: yup.string().required("ZIP code is required"),
-    country: yup.string().required("Country is required"),
-  }),
+  address: yup.string().required("Address is required"),
+  street: yup.string().required("Street is required"),
+  city: yup.string().required("City is required"),
+  state: yup.string().required("State is required"),
+  zip: yup.string().required("ZIP code is required"),
+  country: yup.string().required("Country is required"),
 
-  category: yup
-    .array()
-    .of(yup.string().required("Category cannot be empty"))
-    .min(1, "At least one category is required"),
+  category: yup.string().required("Category is required"),
 
   Images: yup
     .array()
     .of(yup.string().url("Each image must be a valid URL"))
     .min(1, "At least one image is required"),
-
-  staff: yup
-    .array()
-    .of(
-      yup.object({
-        name: yup.string().required("Staff name is required"),
-        role: yup.string().required("Staff role is required"),
-      })
-    )
-    .min(1, "At least one staff member is required"),
 
   vacancy: yup.string().required("Vacancy is required"),
 
@@ -66,34 +52,19 @@ export const updateHotelValidator = yup
       .min(3, "Hotel name must be at least 3 characters"),
     openingTime: yup.string().required("Opening time is required"),
     closingTime: yup.string().required("Closing time is required"),
+    address: yup.string().required("Address is required"),
+    street: yup.string().required("Street is required"),
+    city: yup.string().required("City is required"),
+    state: yup.string().required("State is required"),
+    zip: yup.string().required("ZIP code is required"),
+    country: yup.string().required("Country is required"),
 
-    address: yup.object({
-      street: yup.string().required("Street is required"),
-      city: yup.string().required("City is required"),
-      state: yup.string().required("State is required"),
-      zip: yup.string().required("ZIP code is required"),
-      country: yup.string().required("Country is required"),
-    }),
-
-    category: yup
-      .array()
-      .of(yup.string().required("Category cannot be empty"))
-      .min(1, "At least one category is required"),
+    category: yup.string().required("Category is required"),
 
     Images: yup
       .array()
       .of(yup.string().url("Each image must be a valid URL"))
       .min(1, "At least one image is required"),
-
-    staff: yup
-      .array()
-      .of(
-        yup.object({
-          name: yup.string().required("Staff name is required"),
-          role: yup.string().required("Staff role is required"),
-        })
-      )
-      .min(1, "At least one staff member is required"),
 
     vacancy: yup.string().required("Vacancy is required"),
 

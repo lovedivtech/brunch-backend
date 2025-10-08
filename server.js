@@ -1,8 +1,6 @@
-import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import app from "./app.js";
-import mongoose from "mongoose";
 import connection_db from "./config/db.js";
 import fs from "fs";
 import https from "https";

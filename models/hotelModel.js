@@ -6,21 +6,15 @@ const hotelSchema = mongoose.Schema(
     openingTime: { type: String, default: "" },
     closingTime: { type: String, default: "" },
 
-    address: {
-      street: { type: String, default: "" },
-      city: { type: String, default: "" },
-      state: { type: String, default: "" },
-      zip: { type: String, default: "" },
-      country: { type: String, default: "" },
-    },
-    category: [{ type: String, default: "" }],
+    address: { type: String, default: "" },
+    street: { type: String, default: "" },
+    city: { type: String, default: "" },
+    state: { type: String, default: "" },
+    zip: { type: String, default: "" },
+    country: { type: String, default: "" },
+
+    category: { type: String, default: "" },
     Images: [{ type: String, default: "" }],
-    staff: [
-      {
-        name: { type: String, default: "" },
-        role: { type: String, default: "" },
-      },
-    ],
     vacancy: { type: String, default: "" },
     description: { type: String, default: "" },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
