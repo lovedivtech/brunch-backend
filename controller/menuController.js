@@ -37,30 +37,25 @@ export const createMenu = async (req, res) => {
 ////////////////////  getAllMenu (Pagination) ////////////////////////
 export const getAllMenu = async (req, res) => {
   try {
-    const menus = Menu.find().select("-__v -createdAt -updatedAt");
-    if (!menus) {
-      return res.status(404).json({
-        success: false,
-        message: "Menu not found",
-        data: [],
-        errors: [],
-      });
-    }
-    const apiFeatures = new ApiFeatures(menus, req.query).paginate();
-    const paginatedMenus = await apiFeatures.query;
-    console.log(paginatedMenus);
+    const menuQuery = Menu.find().select("-__v -createdAt -updatedAt");
+    const apiFeatures = new ApiFeatures(menuQuery, req.query)
+      .filter()
+      .paginate();
+    const filteredMenus = await apiFeatures.query;
 
     return res.status(200).json({
       success: true,
-      message: "Menu Find successfully",
-      data: paginatedMenus,
+      message: filteredMenus.length
+        ? `${filteredMenus.length} Menus found successfully`
+        : "No menu items match your query",
+      data: filteredMenus,
       errors: [],
     });
   } catch (error) {
-    console.error("Menu creation error:", error);
+    console.error("Error fetching menus:", error);
     return res.status(500).json({
       success: false,
-      error: "Server error",
+      message: "Server error",
       data: [],
       errors: [error.message],
     });

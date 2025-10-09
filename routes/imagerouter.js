@@ -4,8 +4,9 @@ import { checkOwnerRole } from "../middleware/validate.js";
 import { isAuthenticated } from "../utils/jwtToken.js";
 
 import {
-  getAllImages,
+  deleteImage,
   getImageById,
+  updateImage,
   uploadImage,
 } from "../controller/imageController.js";
 
@@ -19,8 +20,16 @@ route.post(
   uploadImage
 );
 
-route.get("/All-images", getAllImages);
-
 route.get("/:id", getImageById);
+
+route.put(
+  "/image-update/:id",
+  isAuthenticated,
+  checkOwnerRole,
+  upload.single("image"),
+  updateImage
+);
+
+route.delete("/image-delete/:id", isAuthenticated, checkOwnerRole, deleteImage);
 
 export default route;

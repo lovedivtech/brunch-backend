@@ -18,7 +18,11 @@ export const uploadImage = async (req, res) => {
     res.json({
       success: true,
       message: "Image uploaded successfully!",
-      data: { url: savedImage.url, imageId: savedImage.imageId },
+      data: {
+        id: savedImage._id,
+        url: savedImage.url,
+        imageId: savedImage.imageId,
+      },
       error: [],
     });
   } catch (error) {
@@ -26,26 +30,6 @@ export const uploadImage = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Upload failed.",
-      error: error.message,
-      data: [],
-    });
-  }
-};
-
-export const getAllImages = async (req, res) => {
-  try {
-    const images = await Image.find({}).select("-__v").sort({ _id: -1 });
-    res.json({
-      success: true,
-      message: "Images fetched successfully!",
-      data: images,
-      error: [],
-    });
-  } catch (error) {
-    console.error("Error fetching images:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching images.",
       error: error.message,
       data: [],
     });
@@ -60,7 +44,7 @@ export const getImageById = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Image not found.",
-        error: error.message,
+        error: [],
         data: [],
       });
     }
@@ -75,6 +59,93 @@ export const getImageById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching image.",
+      error: [],
+      data: [],
+    });
+  }
+};
+
+export const updateImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image file provided.",
+        error: [],
+        data: [],
+      });
+    }
+    //////////////////////////// update in imagekit //////////////////////////////
+    const existingImage = await Image.findById(id);
+    if (!existingImage) {
+      return res.status(404).json({
+        success: false,
+        message: "Image record not found.",
+        error: [],
+        data: [],
+      });
+    }
+    const response = await imagekit.upload({
+      file: file.buffer,
+      fileName: file.originalname,
+    });
+    //////////////// delete old image from imagekit ////////////////////////////////
+    if (existingImage.imageId) {
+      await imagekit.deleteFile(existingImage.imageId);
+    }
+    existingImage.url = response.url;
+    existingImage.imageId = response.fileId;
+    //////////////// save updated record in database ///////////////////////////////
+    await existingImage.save();
+    res.json({
+      success: true,
+      message: "Image updated successfully!",
+      data: { url: response.url, imageId: response.fileId },
+      error: [],
+    });
+  } catch (error) {
+    console.error("Upload failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Upload failed.",
+      error: error.message,
+      data: [],
+    });
+  }
+};
+
+export const deleteImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const existingImage = await Image.findById(id);
+    if (!existingImage) {
+      return res.status(404).json({
+        success: false,
+        message: "Image record not found.",
+        error: [],
+        data: [],
+      });
+    }
+    //////////////// delete from imagekit ////////////////////////////////
+    if (existingImage.imageId) {
+      await imagekit.deleteFile(existingImage.imageId);
+    }
+    //////////////// delete from database   ///////////////////////////////
+    await Image.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: "Image deleted successfully!",
+      data: [],
+      error: [],
+    });
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting image.",
       error: error.message,
       data: [],
     });
