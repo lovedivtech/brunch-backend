@@ -27,4 +27,3 @@ export class ApiFeatures {
     return this;
   }
 }
-// Skip the specified number of documents and limit the query result to the specified limit
