@@ -104,7 +104,7 @@ export const forgotPWD = async (req, res, next) => {
     const user = await User.findOne({ email: email });
 
     const resetTokenData = (await randomeCryptoToken(user)).toString();
-    const Link = `https://localhost:8000/api/v2/user/reset-password/${resetTokenData}`;
+    const Link = `http://localhost:5173/reset-password/${resetTokenData}`;
     const message = `Your Rquested Url Is Here.\n\n${Link}\n\nThis Link Will Expired In 10 Minutes.`;
 
     await sendEmail({
