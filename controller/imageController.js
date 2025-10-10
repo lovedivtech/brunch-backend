@@ -9,7 +9,11 @@ export const uploadImage = async (req, res) => {
     }
     const Model = await getModelByType(type);
     const doc = await Model.findOne().select("-__v");
-
+    if (!doc) {
+      doc = new Model({
+        images: [],
+      });
+    }
     const response = await imagekit.upload({
       file: file.buffer,
       fileName: file.originalname,
@@ -94,7 +98,7 @@ export const updateImage = async (req, res) => {
         data: [],
       });
     }
-    const Model = getModelByType(req.query.type);
+    const Model = await getModelByType(req.query.type);
     const doc = await Model.findOne();
     // ✅ Find the image in the images array
     const existingImage = doc.images.find(
@@ -126,7 +130,7 @@ export const updateImage = async (req, res) => {
     existingImage.imageId = response.fileId;
 
     // ✅ Save hotel with updated image
-    await hotel.save();
+    await doc.save();
 
     return res.json({
       success: true,
