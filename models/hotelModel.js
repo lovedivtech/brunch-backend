@@ -14,7 +14,12 @@ const hotelSchema = mongoose.Schema(
     country: { type: String, default: "" },
 
     category: { type: String, default: "" },
-    Images: [{ type: String, default: "" }],
+    images: [
+      {
+        url: { type: String },
+        imageId: { type: String },
+      },
+    ],
     vacancy: { type: String, default: "" },
     description: { type: String, default: "" },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },

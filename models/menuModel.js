@@ -49,7 +49,12 @@ const menuSchema = mongoose.Schema(
       },
     ],
     available: { type: Boolean, default: true },
-    image_url: { type: String, default: "" },
+    images: [
+      {
+        url: { type: String },
+        imageId: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,

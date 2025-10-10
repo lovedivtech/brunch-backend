@@ -16,7 +16,7 @@ export const createHotel = async (req, res) => {
       pin: hotel.pin,
       country: hotel.country,
       category: hotel.category,
-      image_url: hotel.image_url,
+      images: hotel.images,
       vacancy: hotel.vacancy,
       description: hotel.description,
       rating: hotel.rating,

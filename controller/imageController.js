@@ -1,28 +1,35 @@
 import imagekit from "../config/imageKitConfig.js";
-import Image from "../models/imageModel.js";
+import { getModelByType } from "../utils/getmodelByTypes.js";
 export const uploadImage = async (req, res) => {
   try {
+    const { type } = req.query;
     const file = req.file;
-
     if (!file) {
       return res.status(400).json({ message: "No image file provided." });
     }
+    const Model = await getModelByType(type);
+    const doc = await Model.findOne().select("-__v");
+
     const response = await imagekit.upload({
       file: file.buffer,
       fileName: file.originalname,
     });
-    const savedImage = await Image.create({
+
+    doc.images.push({
       url: response.url,
       imageId: response.fileId,
     });
+    await doc.save({ validateBeforeSave: false });
+    const uploadedImage = {
+      id: doc.images[doc.images.length - 1]._id,
+      url: response.url,
+      imageId: response.fileId,
+    };
+    console.log(uploadedImage.id);
     res.json({
       success: true,
       message: "Image uploaded successfully!",
-      data: {
-        id: savedImage._id,
-        url: savedImage.url,
-        imageId: savedImage.imageId,
-      },
+      data: uploadedImage,
       error: [],
     });
   } catch (error) {
@@ -36,22 +43,31 @@ export const uploadImage = async (req, res) => {
   }
 };
 
-export const getImageById = async (req, res) => {
+export const getAllImages = async (req, res) => {
   try {
-    const { id } = req.params;
-    const image = await Image.findById(id).select("-__v");
-    if (!image) {
+    const Model = getModelByType(req.query.type);
+    const doc = await Model.findOne().select("images").lean();
+    if (!doc) {
       return res.status(404).json({
         success: false,
         message: "Image not found.",
-        error: [],
         data: [],
+        error: [],
       });
     }
-    res.json({
+    if (doc.images.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No images found.",
+        data: [],
+        error: [],
+      });
+    }
+
+    return res.json({
       success: true,
       message: "Image fetched successfully!",
-      data: image,
+      data: { images: doc.images },
       error: [],
     });
   } catch (error) {
@@ -59,8 +75,8 @@ export const getImageById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching image.",
-      error: [],
       data: [],
+      error: error.message,
     });
   }
 };
@@ -69,6 +85,7 @@ export const updateImage = async (req, res) => {
   try {
     const { id } = req.params;
     const file = req.file;
+
     if (!file) {
       return res.status(400).json({
         success: false,
@@ -77,8 +94,13 @@ export const updateImage = async (req, res) => {
         data: [],
       });
     }
-    //////////////////////////// update in imagekit //////////////////////////////
-    const existingImage = await Image.findById(id);
+    const Model = getModelByType(req.query.type);
+    const doc = await Model.findOne();
+    // ✅ Find the image in the images array
+    const existingImage = doc.images.find(
+      (img) => img._id.toString() === id || img.imageId === id
+    );
+
     if (!existingImage) {
       return res.status(404).json({
         success: false,
@@ -87,27 +109,38 @@ export const updateImage = async (req, res) => {
         data: [],
       });
     }
+
+    // ✅ Upload new image to ImageKit
     const response = await imagekit.upload({
       file: file.buffer,
       fileName: file.originalname,
     });
-    //////////////// delete old image from imagekit ////////////////////////////////
+
+    // ✅ Delete old image from ImageKit (if any)
     if (existingImage.imageId) {
       await imagekit.deleteFile(existingImage.imageId);
     }
+
+    // ✅ Update fields in the image subdocument
     existingImage.url = response.url;
     existingImage.imageId = response.fileId;
-    //////////////// save updated record in database ///////////////////////////////
-    await existingImage.save();
-    res.json({
+
+    // ✅ Save hotel with updated image
+    await hotel.save();
+
+    return res.json({
       success: true,
       message: "Image updated successfully!",
-      data: { url: response.url, imageId: response.fileId },
+      data: {
+        id: existingImage._id,
+        url: response.url,
+        imageId: response.fileId,
+      },
       error: [],
     });
   } catch (error) {
     console.error("Upload failed:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Upload failed.",
       error: error.message,
@@ -119,21 +152,29 @@ export const updateImage = async (req, res) => {
 export const deleteImage = async (req, res) => {
   try {
     const { id } = req.params;
-    const existingImage = await Image.findById(id);
-    if (!existingImage) {
+    const Model = getModelByType(req.query.type);
+    const doc = await Model.findOne();
+    if (!doc) {
       return res.status(404).json({
         success: false,
-        message: "Image record not found.",
-        error: [],
+        message: "Image not found.",
         data: [],
+        error: [],
       });
     }
+    // ✅ Find the image in the images array
+    const existingImage = doc.images.find(
+      (img) => img._id.toString() === id || img.imageId === id
+    );
     //////////////// delete from imagekit ////////////////////////////////
     if (existingImage.imageId) {
       await imagekit.deleteFile(existingImage.imageId);
     }
     //////////////// delete from database   ///////////////////////////////
-    await Image.findByIdAndDelete(id);
+    doc.images = doc.images.filter(
+      (img) => img._id.toString() !== id && img.imageId !== id
+    );
+    await doc.save({ validateBeforeSave: false });
 
     res.json({
       success: true,

@@ -17,10 +17,7 @@ export const createHotelvalidator = yup.object({
 
   category: yup.string().required("Category is required"),
 
-  Images: yup
-    .array()
-    .of(yup.string().url("Each image must be a valid URL"))
-    .min(1, "At least one image is required"),
+  images: yup.array().of(yup.string().url("Each image must be a valid URL")),
 
   vacancy: yup.string().required("Vacancy is required"),
 
@@ -61,7 +58,7 @@ export const updateHotelValidator = yup
 
     category: yup.string().required("Category is required"),
 
-    Images: yup
+    images: yup
       .array()
       .of(yup.string().url("Each image must be a valid URL"))
       .min(1, "At least one image is required"),

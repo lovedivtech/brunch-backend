@@ -15,7 +15,7 @@ export const createMenu = async (req, res) => {
       category: menu.category,
       type: menu.type,
       available: menu.available,
-      image_url: menu.image_url,
+      images: menu.images,
     };
     return res.status(201).json({
       success: true,

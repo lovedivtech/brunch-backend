@@ -5,7 +5,7 @@ import { isAuthenticated } from "../utils/jwtToken.js";
 
 import {
   deleteImage,
-  getImageById,
+  getAllImages,
   updateImage,
   uploadImage,
 } from "../controller/imageController.js";
@@ -20,7 +20,7 @@ route.post(
   uploadImage
 );
 
-route.get("/:id", getImageById);
+route.get("/all-images", getAllImages);
 
 route.put(
   "/image-update/:id",

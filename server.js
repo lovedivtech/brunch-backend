@@ -12,6 +12,8 @@ connection_db();
 //   cert: fs.readFileSync(process.env.SSL_CERT_PATH),
 // };
 
+app.get("/", (req, res) => res.send("Server is running live!"));
+
 const port = process.env.PORT || 3000;
 http.createServer(app).listen(port, () => {
   console.log(`✅ HTTP Server running at localhost:${port}`);
