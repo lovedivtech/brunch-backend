@@ -29,7 +29,7 @@ export const uploadImage = async (req, res) => {
       url: response.url,
       imageId: response.fileId,
     };
-    console.log(uploadedImage.id);
+
     res.json({
       success: true,
       message: "Image uploaded successfully!",
