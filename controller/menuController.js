@@ -3,7 +3,17 @@ import { ApiFeatures } from "../utils/apiFunctionality.js";
 
 export const createMenu = async (req, res) => {
   try {
-    const menuData = { ...req.body };
+    const {
+      name,
+      description,
+      rating,
+      price,
+      offer,
+      category,
+      type,
+      available,
+      images,
+    } = req.body;
     const menu = await Menu.create(menuData);
     const menuList = {
       id: menu._id,
@@ -34,7 +44,7 @@ export const createMenu = async (req, res) => {
   }
 };
 
-////////////////////  getAllMenu (Pagination) ////////////////////////
+// TODO :////////////////////  getAllMenu (Pagination) ////////////////////////
 export const getAllMenu = async (req, res) => {
   try {
     const menuQuery = Menu.find().select("-__v -createdAt -updatedAt");
