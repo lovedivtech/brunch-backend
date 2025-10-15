@@ -40,20 +40,29 @@ export const createHotel = async (req, res) => {
 
 export const viewHotelDetails = async (req, res) => {
   try {
-    const hotel = await Hotel.find().select("-__v -createdAt -updatedAt");
-
-    if (!hotel) {
-      return res.status(404).json({
-        success: false,
-        message: "Hotel not found",
-        data: [],
-        errors: [],
-      });
-    }
+    const hotel = await Hotel.findOne().select("-__v -createdAt -updatedAt");
+    console.log(hotel);
+    const hotelData = {
+      id: hotel._id,
+      name: hotel.hotelName,
+      openingTime: hotel.openingTime,
+      closingTime: hotel.closingTime,
+      address: hotel.address,
+      street: hotel.street,
+      city: hotel.city,
+      state: hotel.state,
+      pin: hotel.pin,
+      country: hotel.country,
+      category: hotel.category,
+      images: hotel.images,
+      vacancy: hotel.vacancy,
+      description: hotel.description,
+      rating: hotel.rating,
+    };
     return res.status(200).json({
       success: true,
       message: "Hotel Find successfully",
-      hotel,
+      data: hotelData,
       errors: [],
     });
   } catch (error) {
