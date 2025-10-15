@@ -2,12 +2,15 @@
   "postman.settings.dotenv-detection-notification-visibility": false,
   "cSpell.words": [
     "andhra",
+    "getmodel",
     "goan",
     "hyderabadi",
     "imagekit",
     "imagerouter",
     "maharashtrian",
-    "mughlai"
+    "mughlai",
+    "nonveg",
+    "subdocument"
   ],
   "git.ignoreLimitWarning": true
 }

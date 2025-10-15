@@ -31,7 +31,9 @@ const allowedTypes = [
   "bbq",
   "fast food",
   "beverages",
-  "desserts",
+  "dessert",
+  "starter",
+  "drink",
 ];
 
 export const createMenuValidator = yup.object().shape({

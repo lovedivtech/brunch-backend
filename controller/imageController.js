@@ -8,7 +8,7 @@ export const uploadImage = async (req, res) => {
       return res.status(400).json({ message: "No image file provided." });
     }
     const Model = await getModelByType(type);
-    const doc = await Model.findOne().select("-__v");
+    let doc = await Model.findOne().select("-__v");
     if (!doc) {
       doc = new Model({
         images: [],
