@@ -69,7 +69,8 @@ export const getAllImages = async (req, res) => {
 
 export const updateImage = async (req, res) => {
   try {
-    const { imageId: id } = req.params;
+    const { type } = req.query;
+    const { imageId } = req.params;
     const file = req.file;
 
     if (!file) {
@@ -80,8 +81,8 @@ export const updateImage = async (req, res) => {
         data: [],
       });
     }
-    const Model = await getModelByType(req.query.type);
-    const doc = await Model.findOne();
+    const Model = await getModelByType(type);
+    const doc = await Model.findOne(imageId).lean();
     // ✅ Find the image in the images array
     const existingImage = doc.images.find((img) => img.imageId === id);
 
@@ -110,7 +111,6 @@ export const updateImage = async (req, res) => {
     existingImage.imageId = response.fileId;
 
     // ✅ Save hotel/menu with updated image
-    await doc.save({ validateBeforeSave: false });
 
     return res.json({
       success: true,
@@ -131,7 +131,7 @@ export const updateImage = async (req, res) => {
 
 export const deleteImage = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { imageId } = req.params;
     const Model = getModelByType(req.query.type);
     const doc = await Model.findOne();
     if (!doc) {
