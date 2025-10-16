@@ -14,7 +14,17 @@ export const createMenu = async (req, res) => {
       available,
       images,
     } = req.body;
-    const menu = await Menu.create(menuData);
+    const menu = await Menu.create({
+      name,
+      description,
+      rating,
+      price,
+      offer,
+      category,
+      type,
+      available,
+      images,
+    });
     const menuList = {
       id: menu._id,
       name: menu.name,

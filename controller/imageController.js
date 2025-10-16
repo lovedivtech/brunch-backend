@@ -7,33 +7,15 @@ export const uploadImage = async (req, res) => {
     if (!file) {
       return res.status(400).json({ message: "No image file provided." });
     }
-    const Model = await getModelByType(type);
-    let doc = await Model.findOne().select("-__v");
-    if (!doc) {
-      doc = new Model({
-        images: [],
-      });
-    }
     const response = await imagekit.upload({
       file: file.buffer,
       fileName: file.originalname,
     });
 
-    doc.images.push({
-      url: response.url,
-      imageId: response.fileId,
-    });
-    await doc.save({ validateBeforeSave: false });
-    const uploadedImage = {
-      id: doc.images[doc.images.length - 1]._id,
-      url: response.url,
-      imageId: response.fileId,
-    };
-
     res.json({
       success: true,
       message: "Image uploaded successfully!",
-      data: uploadedImage,
+      data: { url: response.url, imageId: response.fileId },
       error: [],
     });
   } catch (error) {
@@ -87,7 +69,7 @@ export const getAllImages = async (req, res) => {
 
 export const updateImage = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { imageId: id } = req.params;
     const file = req.file;
 
     if (!file) {
@@ -101,9 +83,7 @@ export const updateImage = async (req, res) => {
     const Model = await getModelByType(req.query.type);
     const doc = await Model.findOne();
     // ✅ Find the image in the images array
-    const existingImage = doc.images.find(
-      (img) => img._id.toString() === id || img.imageId === id
-    );
+    const existingImage = doc.images.find((img) => img.imageId === id);
 
     if (!existingImage) {
       return res.status(404).json({
@@ -129,17 +109,13 @@ export const updateImage = async (req, res) => {
     existingImage.url = response.url;
     existingImage.imageId = response.fileId;
 
-    // ✅ Save hotel with updated image
-    await doc.save();
+    // ✅ Save hotel/menu with updated image
+    await doc.save({ validateBeforeSave: false });
 
     return res.json({
       success: true,
       message: "Image updated successfully!",
-      data: {
-        id: existingImage._id,
-        url: response.url,
-        imageId: response.fileId,
-      },
+      data: doc.images,
       error: [],
     });
   } catch (error) {
@@ -183,7 +159,7 @@ export const deleteImage = async (req, res) => {
     res.json({
       success: true,
       message: "Image deleted successfully!",
-      data: [],
+      data: doc.images,
       error: [],
     });
   } catch (error) {
