@@ -70,7 +70,7 @@ export const getAllImages = async (req, res) => {
 export const updateImage = async (req, res) => {
   try {
     const { type } = req.query;
-    const { imageId } = req.params;
+    const { id: imageId } = req.params;
     const file = req.file;
 
     if (!file) {
@@ -82,11 +82,12 @@ export const updateImage = async (req, res) => {
       });
     }
     const Model = await getModelByType(type);
-    const doc = await Model.findOne(imageId).lean();
-    // ✅ Find the image in the images array
-    const existingImage = doc.images.find((img) => img.imageId === id);
+    // ✅ Find the document containing this imageId
+    const doc = await Model.findOne({ "images.imageId": imageId });
 
-    if (!existingImage) {
+    // ✅ Find the image in the images array
+    const image = doc.images.find((img) => img.imageId === imageId);
+    if (!image) {
       return res.status(404).json({
         success: false,
         message: "Image record not found.",
@@ -94,7 +95,6 @@ export const updateImage = async (req, res) => {
         data: [],
       });
     }
-
     // ✅ Upload new image to ImageKit
     const response = await imagekit.upload({
       file: file.buffer,
@@ -102,20 +102,19 @@ export const updateImage = async (req, res) => {
     });
 
     // ✅ Delete old image from ImageKit (if any)
-    if (existingImage.imageId) {
-      await imagekit.deleteFile(existingImage.imageId);
-    }
+    await imagekit.deleteFile(image.imageId);
 
     // ✅ Update fields in the image subdocument
-    existingImage.url = response.url;
-    existingImage.imageId = response.fileId;
+    image.url = response.url;
+    image.imageId = response.fileId;
 
-    // ✅ Save hotel/menu with updated image
+    // ✅ Save Document
+    await doc.save();
 
     return res.json({
       success: true,
       message: "Image updated successfully!",
-      data: doc.images,
+      data: image,
       error: [],
     });
   } catch (error) {

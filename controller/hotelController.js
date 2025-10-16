@@ -41,7 +41,7 @@ export const createHotel = async (req, res) => {
 export const viewHotelDetails = async (req, res) => {
   try {
     const hotel = await Hotel.findOne().select("-__v -createdAt -updatedAt");
-    console.log(hotel);
+
     const hotelData = {
       id: hotel._id,
       name: hotel.hotelName,
