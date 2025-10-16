@@ -2,7 +2,7 @@ import * as yup from "yup";
 import hotelModel from "../models/hotelModel.js";
 
 export const createHotelvalidator = yup.object({
-  hotelName: yup
+  name: yup
     .string()
     .required("Hotel name is required")
     .min(3, "Hotel name must be at least 3 characters"),
@@ -48,7 +48,7 @@ export const viewHotelDetailsValidator = yup
 
 export const updateHotelValidator = yup
   .object({
-    hotelName: yup
+    name: yup
       .string()
       .required("Hotel name is required")
       .min(3, "Hotel name must be at least 3 characters"),

@@ -6,7 +6,7 @@ export const createHotel = async (req, res) => {
     const hotel = await Hotel.create(hotelData);
     const hotelList = {
       id: hotel._id,
-      name: hotel.hotelName,
+      name: hotel.name,
       openingTime: hotel.openingTime,
       closingTime: hotel.closingTime,
       address: hotel.address,
@@ -44,7 +44,7 @@ export const viewHotelDetails = async (req, res) => {
 
     const hotelData = {
       id: hotel._id,
-      name: hotel.hotelName,
+      name: hotel.name,
       openingTime: hotel.openingTime,
       closingTime: hotel.closingTime,
       address: hotel.address,
