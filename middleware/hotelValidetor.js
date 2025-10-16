@@ -63,11 +63,12 @@ export const updateHotelValidator = yup
 
     category: yup.string().required("Category is required"),
 
-    images: yup
-      .array()
-      .of(yup.string().url("Each image must be a valid URL"))
-      .min(1, "At least one image is required"),
-
+    images: yup.array().of(
+      yup.object().shape({
+        url: yup.string().url().required("Image URL is required"),
+        imageId: yup.string().required("Image ID is required"),
+      })
+    ),
     vacancy: yup.string().required("Vacancy is required"),
 
     description: yup
