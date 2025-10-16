@@ -148,10 +148,12 @@ export const updateMenuValidator = yup.object().shape({
 
   available: yup.boolean().notRequired(),
 
-  images: yup
-    .array()
-    .of(yup.string().url("Each image must be a valid URL"))
-    .min(1, "At least one image is required"),
+  images: yup.array().of(
+    yup.object().shape({
+      url: yup.string().url().required("Image URL is required"),
+      imageId: yup.string().required("Image ID is required"),
+    })
+  ),
 });
 
 export const deleteMenuValidator = yup.object().shape({});
