@@ -130,9 +130,33 @@ export const updateImage = async (req, res) => {
 
 export const deleteImage = async (req, res) => {
   try {
-    const { imageId } = req.params;
-    const Model = getModelByType(req.query.type);
+    const { id: imageId } = req.params;
+    const { type } = req.query;
+
+    console.log("Received delete image request:", { imageId, type });
+
+    if (!imageId || !type) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing imageId or type.",
+        data: [],
+        error: [],
+      });
+    }
+
+    const Model = getModelByType(type);
+
+    if (!Model) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid type provided.",
+        data: [],
+        error: [],
+      });
+    }
+
     const doc = await Model.findOne({ "images.imageId": imageId });
+
     if (!doc) {
       return res.status(404).json({
         success: false,
@@ -141,17 +165,26 @@ export const deleteImage = async (req, res) => {
         error: [],
       });
     }
-    // ✅ Find the image in the images array
+
     const existingImage = doc.images.find((img) => img.imageId === imageId);
-    //////////////// delete from imagekit ////////////////////////////////
-    if (existingImage.imageId) {
-      await imagekit.deleteFile(existingImage.imageId);
+
+    if (!existingImage) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found in document.",
+        data: [],
+        error: [],
+      });
     }
-    //////////////// delete from database   ///////////////////////////////
+
+    // ✅ Delete from ImageKit
+    await imagekit.deleteFile(existingImage.imageId);
+
+    // ✅ Remove from DB
     doc.images = doc.images.filter((img) => img.imageId !== imageId);
     await doc.save({ validateBeforeSave: false });
 
-    res.json({
+    return res.json({
       success: true,
       message: "Image deleted successfully!",
       data: [],
@@ -159,7 +192,7 @@ export const deleteImage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting image:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error deleting image.",
       error: error.message,
