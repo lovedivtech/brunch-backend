@@ -148,9 +148,7 @@ export const deleteImage = async (req, res) => {
       await imagekit.deleteFile(existingImage.imageId);
     }
     //////////////// delete from database   ///////////////////////////////
-    doc.images = doc.images.filter(
-      (img) => img._id.toString() !== id && img.imageId !== id
-    );
+    doc.images = doc.images.filter((img) => img.imageId !== imageId);
     await doc.save({ validateBeforeSave: false });
 
     res.json({
