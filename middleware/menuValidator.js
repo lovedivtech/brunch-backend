@@ -88,8 +88,8 @@ export const createMenuValidator = yup.object().shape({
 
   images: yup.array().of(
     yup.object().shape({
-      url: yup.string().url().required("Image URL is required"),
-      imageId: yup.string().required("Image ID is required"),
+      url: yup.string().url().notRequired(),
+      imageId: yup.string().notRequired(),
     })
   ),
 });
@@ -150,8 +150,8 @@ export const updateMenuValidator = yup.object().shape({
 
   images: yup.array().of(
     yup.object().shape({
-      url: yup.string().url().required("Image URL is required"),
-      imageId: yup.string().required("Image ID is required"),
+      url: yup.string().url().notRequired(),
+      imageId: yup.string().notRequired(),
     })
   ),
 });
