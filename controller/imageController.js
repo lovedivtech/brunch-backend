@@ -132,7 +132,7 @@ export const deleteImage = async (req, res) => {
   try {
     const { imageId } = req.params;
     const Model = getModelByType(req.query.type);
-    const doc = await Model.findOne();
+    const doc = await Model.findOne({ "images.imageId": imageId });
     if (!doc) {
       return res.status(404).json({
         success: false,
@@ -142,9 +142,7 @@ export const deleteImage = async (req, res) => {
       });
     }
     // ✅ Find the image in the images array
-    const existingImage = doc.images.find(
-      (img) => img._id.toString() === id || img.imageId === id
-    );
+    const existingImage = doc.images.find((img) => img.imageId === imageId);
     //////////////// delete from imagekit ////////////////////////////////
     if (existingImage.imageId) {
       await imagekit.deleteFile(existingImage.imageId);
@@ -158,7 +156,7 @@ export const deleteImage = async (req, res) => {
     res.json({
       success: true,
       message: "Image deleted successfully!",
-      data: doc.images,
+      data: [],
       error: [],
     });
   } catch (error) {
