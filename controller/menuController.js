@@ -60,7 +60,8 @@ export const getAllMenu = async (req, res) => {
     const menuQuery = Menu.find().select("-__v -createdAt -updatedAt");
     const apiFeatures = new ApiFeatures(menuQuery, req.query)
       .paginate()
-      .filter();
+      .filter()
+      .sort();
     const filteredMenus = await apiFeatures.query.lean();
 
     return res.status(200).json({

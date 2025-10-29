@@ -42,6 +42,16 @@ export class ApiFeatures {
     this.query = this.query.skip(skip).limit(limit);
     return this;
   }
+
+  sort() {
+    if (this.queryStr.sort) {
+      const sortBy = this.queryStr.sort.split(",").join(" ");
+      this.query = this.query.sort(sortBy);
+    } else {
+      this.query = this.query.sort("-createdAt");
+    }
+    return this;
+  }
 }
 
 // export const filterData = async (req, res, next) => {
