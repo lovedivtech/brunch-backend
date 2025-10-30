@@ -9,6 +9,7 @@ import {
 import {
   createHotel,
   updateHotel,
+  ViewAllHotels,
   viewHotelDetails,
 } from "../controller/hotelController.js";
 
@@ -23,10 +24,12 @@ route.post(
 );
 
 route.get(
-  "/hotel-description",
+  "/hotel-description/:id",
   validate(viewHotelDetailsValidator),
   viewHotelDetails
 );
+
+route.get("/all-hotels", validate(viewHotelDetailsValidator), ViewAllHotels);
 
 route.put(
   "/hotel-update/:id",

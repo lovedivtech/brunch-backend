@@ -40,7 +40,9 @@ export const createHotel = async (req, res) => {
 
 export const viewHotelDetails = async (req, res) => {
   try {
-    const hotel = await Hotel.findOne().select("-__v -createdAt -updatedAt");
+    const hotel = await Hotel.findById(req.params.id).select(
+      "-__v -createdAt -updatedAt"
+    );
 
     const hotelData = {
       id: hotel._id,
@@ -63,6 +65,26 @@ export const viewHotelDetails = async (req, res) => {
       success: true,
       message: "Hotel Find successfully",
       data: hotelData,
+      errors: [],
+    });
+  } catch (error) {
+    console.error("Hotel creation error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Server error",
+      data: [],
+      error: [error.message],
+    });
+  }
+};
+
+export const ViewAllHotels = async (req, res) => {
+  try {
+    const hotels = await Hotel.find().select("-__v -createdAt -updatedAt");
+    return res.status(200).json({
+      success: true,
+      message: "Hotels Find successfully",
+      data: hotels,
       errors: [],
     });
   } catch (error) {

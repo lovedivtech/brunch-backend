@@ -1,8 +1,20 @@
 import Menu from "../models/menuModel.js";
+import Hotel from "../models/hotelModel.js";
 import { ApiFeatures } from "../utils/apiFunctionality.js";
 
-export const createMenu = async (req, res) => {
+export const createMenuItem = async (req, res) => {
   try {
+    const hotel = await Hotel.findById(req.params.id).select(
+      "-__v -createdAt -updatedAt"
+    );
+    if (!hotel) {
+      return res.status(404).json({
+        success: false,
+        message: "Hotel not found",
+        data: [],
+        errors: ["Invalid hotel ID"],
+      });
+    }
     const {
       name,
       description,
@@ -24,7 +36,10 @@ export const createMenu = async (req, res) => {
       type,
       available,
       images,
+      hotel: hotel._id,
     });
+    hotel.menus.push(menu._id);
+    await hotel.save();
     const menuList = {
       id: menu._id,
       name: menu.name,
@@ -36,6 +51,7 @@ export const createMenu = async (req, res) => {
       type: menu.type,
       available: menu.available,
       images: menu.images,
+      hotel: menu.hotel,
     };
     return res.status(201).json({
       success: true,
@@ -54,21 +70,37 @@ export const createMenu = async (req, res) => {
   }
 };
 
-// TODO :////////////////////  getAllMenu (Pagination) ////////////////////////
-export const getAllMenu = async (req, res) => {
+// TODO :////////////////////  getAllMenu (Pagination / Filter/ Sort) ////////////////////////
+export const getAllMenuItem = async (req, res) => {
   try {
-    const menuQuery = Menu.find().select("-__v -createdAt -updatedAt");
+    const { id } = req.params;
+
+    const hotel = await Hotel.findById(id).select("-__v -createdAt -updatedAt");
+    if (!hotel) {
+      return res.status(404).json({
+        success: false,
+        message: "Hotel not found",
+        data: [],
+        errors: ["Invalid hotel ID"],
+      });
+    }
+
+    const menuQuery = Menu.find({ hotel: hotel._id }).select(
+      "-__v -createdAt -updatedAt"
+    );
+
     const apiFeatures = new ApiFeatures(menuQuery, req.query)
       .paginate()
       .filter()
       .sort();
+
     const filteredMenus = await apiFeatures.query.lean();
 
     return res.status(200).json({
       success: true,
       message: filteredMenus.length
-        ? `${filteredMenus.length} Menus found successfully`
-        : "No menu items match your query",
+        ? `${filteredMenus.length} menus found successfully`
+        : "No menus found for this hotel",
       data: filteredMenus,
       errors: [],
     });
@@ -83,7 +115,7 @@ export const getAllMenu = async (req, res) => {
   }
 };
 
-export const getSingleMenu = async (req, res) => {
+export const getSingleMenuItem = async (req, res) => {
   try {
     const menu = await Menu.findById(req.params.id).select(
       "-__v -createdAt -updatedAt"
@@ -113,7 +145,7 @@ export const getSingleMenu = async (req, res) => {
   }
 };
 
-export const updateMenu = async (req, res) => {
+export const updateMenuItem = async (req, res) => {
   try {
     const menu = await Menu.findById(req.params.id).select(
       "-__v -createdAt -updatedAt"
@@ -148,10 +180,11 @@ export const updateMenu = async (req, res) => {
   }
 };
 
-export const deleteMenu = async (req, res) => {
+export const deleteMenuItem = async (req, res) => {
   try {
-    const menu = await Menu.findByIdAndDelete(req.params.id);
-    if (!menu) {
+    const { menuId, hotelId } = req.params;
+    const deletedMenu = await Menu.findByIdAndDelete(menuId);
+    if (!deletedMenu) {
       return res.status(404).json({
         success: false,
         message: "Menu not found",
@@ -159,6 +192,9 @@ export const deleteMenu = async (req, res) => {
         errors: [],
       });
     }
+
+    // Remove menu reference from hotel
+    await Hotel.findByIdAndUpdate(hotelId, { $pull: { menus: menuId } });
 
     return res.status(200).json({
       success: true,
@@ -176,15 +212,19 @@ export const deleteMenu = async (req, res) => {
   }
 };
 
-export const favoriteMenu = async (req, res) => {
+export const favoriteMenuItem = async (req, res) => {
   try {
-    const menu = await Menu.find({ rating: { $gte: 4 } }).select(
-      "-__v -createdAt -updatedAt"
-    );
-    if (!menu || menu.length === 0) {
+    const { hotelId } = req.params;
+
+    const favoriteMenus = await Menu.find({
+      hotel: hotelId,
+      rating: { $gte: 4 },
+    }).select("-__v -createdAt -updatedAt");
+
+    if (!favoriteMenus.length) {
       return res.status(404).json({
         success: false,
-        message: "No favorite menus found",
+        message: "No favorite menus found for this hotel",
         data: [],
         errors: [],
       });
@@ -193,7 +233,7 @@ export const favoriteMenu = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Favorite menus retrieved successfully",
-      data: menu,
+      data: favoriteMenus,
       errors: [],
     });
   } catch (errors) {

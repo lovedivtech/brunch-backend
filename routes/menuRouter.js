@@ -2,12 +2,12 @@ import express from "express";
 import { checkOwnerRole, validate } from "../middleware/validate.js";
 import { isAuthenticated } from "../utils/jwtToken.js";
 import {
-  createMenu,
-  getAllMenu,
-  getSingleMenu,
-  updateMenu,
-  deleteMenu,
-  favoriteMenu,
+  createMenuItem,
+  getAllMenuItem,
+  getSingleMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
+  favoriteMenuItem,
 } from "../controller/menuController.js";
 import {
   createMenuValidator,
@@ -19,31 +19,40 @@ import {
 
 const route = express.Router();
 route.post(
-  "/menu-creation",
+  "/hotel/:id/menu-creation",
   isAuthenticated,
   validate(createMenuValidator),
   checkOwnerRole,
-  createMenu
+  createMenuItem
 );
 
-route.get("/all-menus", validate(viewAllMenuValidator), getAllMenu);
-route.get("/favorite-menus", favoriteMenu);
-route.get("/:id", validate(viewSingleMenuValidator), getSingleMenu);
+route.get(
+  "/hotel/:id/all-menus",
+  validate(viewAllMenuValidator),
+  getAllMenuItem
+);
+route.get("/hotel/:id/favorite-menus", favoriteMenuItem);
+
+route.get(
+  "/hotel/menu/:id",
+  validate(viewSingleMenuValidator),
+  getSingleMenuItem
+);
 
 route.put(
-  "/menu-update/:id",
+  "/hotel/:id/menu-update/:id",
   isAuthenticated,
   validate(updateMenuValidator),
   checkOwnerRole,
-  updateMenu
+  updateMenuItem
 );
 
 route.delete(
-  "/menus-delete/:id",
+  "/hotel/:hotelId/menus-delete/:menuId",
   isAuthenticated,
   validate(deleteMenuValidator),
   checkOwnerRole,
-  deleteMenu
+  deleteMenuItem
 );
 
 export default route;

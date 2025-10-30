@@ -51,6 +51,12 @@ const menuSchema = mongoose.Schema(
     },
 
     available: { type: Boolean, default: true },
+
+    hotel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "hotel",
+      required: true,
+    },
     images: [
       {
         url: { type: String },

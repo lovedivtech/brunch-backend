@@ -24,6 +24,12 @@ const hotelSchema = mongoose.Schema(
     description: { type: String, default: "" },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     rating: { type: Number, default: 0 },
+    menus: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "menu",
+      },
+    ],
   },
   {
     toObject: {
