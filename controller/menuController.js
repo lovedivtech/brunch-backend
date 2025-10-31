@@ -212,10 +212,12 @@ export const deleteMenuItem = async (req, res) => {
 
 export const favoriteMenuItem = async (req, res) => {
   try {
-    const { hotelId } = req.params;
+    const { id } = req.params;
     const ownerId = req.user._id;
 
-    const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId });
+    const hotel = await Hotel.findOne({ _id: id, owner: ownerId });
+    console.log("Hotel found:", hotel);
+
     if (!hotel) {
       return res.status(403).json({
         success: false,
@@ -230,11 +232,18 @@ export const favoriteMenuItem = async (req, res) => {
       rating: { $gte: 4 },
     }).select("-__v -createdAt -updatedAt");
 
+    if (favoriteMenus.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No favorite menus found for this hotel",
+        data: [],
+        errors: [],
+      });
+    }
+
     return res.status(200).json({
       success: true,
-      message: favoriteMenus.length
-        ? "Favorite menus retrieved successfully"
-        : "No favorite menus found for this hotel",
+      message: "Favorite menus retrieved successfully",
       data: favoriteMenus,
       errors: [],
     });

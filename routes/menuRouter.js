@@ -28,14 +28,21 @@ route.post(
 
 route.get(
   "/hotel/:id/all-menus",
+  isAuthenticated,
   validate(viewAllMenuValidator),
   getAllMenuItem
 );
-route.get("/hotel/:id/favorite-menus", favoriteMenuItem);
+route.get(
+  "/hotel/:id/favorite-menus",
+  isAuthenticated,
+  checkOwnerRole,
+  favoriteMenuItem
+);
 
 route.get(
   "/hotel/menu/:id",
   validate(viewSingleMenuValidator),
+  isAuthenticated,
   getSingleMenuItem
 );
 
