@@ -14,6 +14,7 @@ import {
 } from "../controller/hotelController.js";
 
 const route = express.Router();
+
 route.post(
   "/hotel-creation",
   isAuthenticated,
@@ -25,11 +26,17 @@ route.post(
 
 route.get(
   "/hotel-description/:id",
+  isAuthenticated,
   validate(viewHotelDetailsValidator),
   viewHotelDetails
 );
 
-route.get("/all-hotels", validate(viewHotelDetailsValidator), ViewAllHotels);
+route.get(
+  "/all-hotels",
+  isAuthenticated,
+  validate(viewHotelDetailsValidator),
+  ViewAllHotels
+);
 
 route.put(
   "/hotel-update/:id",

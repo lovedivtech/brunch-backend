@@ -47,7 +47,7 @@ export const JWTSignVerifyUserData = async function (user) {
       tokenExpire: decodeData.exp,
       firstName: user.firstName,
       lastName: user.lastName,
-      userName: user.username,
+      username: user.username,
       email: user.email,
       phoneNo: user.phoneNo,
       role: user.role,
@@ -82,6 +82,14 @@ export const isAuthenticated = (req, res, next) => {
       role: decoded.role,
       username: decoded.username,
     };
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Invalid token",
+        error: ["Invalid token"],
+        data: [],
+      });
+    }
 
     next();
   } catch (errors) {

@@ -1,107 +1,81 @@
-import Menu from "../models/menuModel.js";
 import Hotel from "../models/hotelModel.js";
+import Menu from "../models/menuModel.js";
 import { ApiFeatures } from "../utils/apiFunctionality.js";
 
 export const createMenuItem = async (req, res) => {
   try {
-    const hotel = await Hotel.findById(req.params.id).select(
+    const ownerId = req.user._id;
+    const { id: hotelId } = req.params;
+
+    // ✅ Ensure hotel belongs to the current owner
+    const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId }).select(
       "-__v -createdAt -updatedAt"
     );
     if (!hotel) {
       return res.status(404).json({
         success: false,
-        message: "Hotel not found",
+        message: "Hotel not found or unauthorized access",
         data: [],
-        errors: ["Invalid hotel ID"],
+        errors: ["You can only create menus for your own hotels"],
       });
     }
-    const {
-      name,
-      description,
-      rating,
-      price,
-      offer,
-      category,
-      type,
-      available,
-      images,
-    } = req.body;
-    const menu = await Menu.create({
-      name,
-      description,
-      rating,
-      price,
-      offer,
-      category,
-      type,
-      available,
-      images,
-      hotel: hotel._id,
-    });
+
+    // ✅ Create menu item
+    const menu = await Menu.create({ ...req.body, hotel: hotel._id });
+
+    // ✅ Add menu reference in hotel document
     hotel.menus.push(menu._id);
     await hotel.save();
-    const menuList = {
-      id: menu._id,
-      name: menu.name,
-      description: menu.description,
-      rating: menu.rating,
-      price: menu.price,
-      offer: menu.offer,
-      category: menu.category,
-      type: menu.type,
-      available: menu.available,
-      images: menu.images,
-      hotel: menu.hotel,
-    };
+
     return res.status(201).json({
       success: true,
       message: "Menu created successfully",
-      data: menuList,
+      data: menu,
       errors: [],
     });
-  } catch (errors) {
-    console.error("Menu creation error:", errors);
+  } catch (error) {
+    console.error("Menu creation error:", error);
     return res.status(500).json({
       success: false,
-      error: "Server error",
+      message: "Server error",
       data: [],
-      errors: [errors.message],
+      errors: [error.message],
     });
   }
 };
 
-// TODO :////////////////////  getAllMenu (Pagination / Filter/ Sort) ////////////////////////
 export const getAllMenuItem = async (req, res) => {
   try {
-    const { id } = req.params;
+    const ownerId = req.user._id;
+    const { id: hotelId } = req.params;
 
-    const hotel = await Hotel.findById(id).select("-__v -createdAt -updatedAt");
+    const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId }).select(
+      "_id"
+    );
     if (!hotel) {
       return res.status(404).json({
         success: false,
-        message: "Hotel not found",
+        message: "Hotel not found or unauthorized",
         data: [],
-        errors: ["Invalid hotel ID"],
+        errors: [],
       });
     }
 
     const menuQuery = Menu.find({ hotel: hotel._id }).select(
       "-__v -createdAt -updatedAt"
     );
-
     const apiFeatures = new ApiFeatures(menuQuery, req.query)
       .paginate()
       .filter()
       .sort();
-
-    const filteredMenus = await apiFeatures.query.lean();
+    const menus = await apiFeatures.query.lean();
 
     return res.status(200).json({
       success: true,
-      message: filteredMenus.length
-        ? `${filteredMenus.length} menus found successfully`
+      message: menus.length
+        ? `${menus.length} menu(s) found for your hotel`
         : "No menus found for this hotel",
-      data: filteredMenus,
+      data: menus,
       errors: [],
     });
   } catch (error) {
@@ -117,13 +91,17 @@ export const getAllMenuItem = async (req, res) => {
 
 export const getSingleMenuItem = async (req, res) => {
   try {
-    const menu = await Menu.findById(req.params.id).select(
-      "-__v -createdAt -updatedAt"
-    );
-    if (!menu) {
+    const ownerId = req.user._id;
+    const { id } = req.params;
+
+    const menu = await Menu.findById(id)
+      .populate("hotel", "owner name")
+      .select("-__v -createdAt -updatedAt");
+
+    if (!menu || menu.hotel.owner.toString() !== ownerId.toString()) {
       return res.status(404).json({
         success: false,
-        message: "Menu not found",
+        message: "Menu not found or unauthorized access",
         data: [],
         errors: [],
       });
@@ -131,51 +109,55 @@ export const getSingleMenuItem = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Menu Find successfully",
+      message: "Menu retrieved successfully",
       data: menu,
       errors: [],
     });
-  } catch (errors) {
+  } catch (error) {
+    console.error("Menu retrieval error:", error);
     return res.status(500).json({
       success: false,
-      error: "Server error",
+      message: "Server error",
       data: [],
-      errors: [errors.message],
+      errors: [error.message],
     });
   }
 };
 
 export const updateMenuItem = async (req, res) => {
   try {
-    const menu = await Menu.findById(req.params.id).select(
-      "-__v -createdAt -updatedAt"
-    );
-    if (!menu) {
-      return res.status(404).json({
+    const ownerId = req.user._id;
+    const { id } = req.params;
+
+    const menu = await Menu.findById(id).populate("hotel", "owner");
+    if (!menu || menu.hotel.owner.toString() !== ownerId.toString()) {
+      return res.status(403).json({
         success: false,
-        message: "Menu not found",
+        message: "You are not authorized to update this menu",
         data: [],
         errors: [],
       });
     }
 
-    const menuData = { ...req.body };
-    const updatedMenu = await Menu.findByIdAndUpdate(req.params.id, menuData, {
+    const updatedMenu = await Menu.findByIdAndUpdate(id, req.body, {
       new: true,
+      runValidators: true,
       select: "-__v -createdAt -updatedAt",
     });
+
     return res.status(200).json({
       success: true,
       message: "Menu updated successfully",
       data: updatedMenu,
       errors: [],
     });
-  } catch (errors) {
+  } catch (error) {
+    console.error("Menu update error:", error);
     return res.status(500).json({
       success: false,
-      error: "Server error",
+      message: "Server error",
       data: [],
-      errors: [errors.message],
+      errors: [error.message],
     });
   }
 };
@@ -183,7 +165,22 @@ export const updateMenuItem = async (req, res) => {
 export const deleteMenuItem = async (req, res) => {
   try {
     const { menuId, hotelId } = req.params;
-    const deletedMenu = await Menu.findByIdAndDelete(menuId);
+    const ownerId = req.user._id;
+
+    const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId });
+    if (!hotel) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access — this hotel does not belong to you",
+        data: [],
+        errors: [],
+      });
+    }
+
+    const deletedMenu = await Menu.findOneAndDelete({
+      _id: menuId,
+      hotel: hotel._id,
+    });
     if (!deletedMenu) {
       return res.status(404).json({
         success: false,
@@ -202,12 +199,13 @@ export const deleteMenuItem = async (req, res) => {
       data: [],
       errors: [],
     });
-  } catch (errors) {
+  } catch (error) {
+    console.error("Menu delete error:", error);
     return res.status(500).json({
       success: false,
-      error: "Server error",
+      message: "Server error",
       data: [],
-      errors: [errors.message],
+      errors: [error.message],
     });
   }
 };
@@ -215,33 +213,38 @@ export const deleteMenuItem = async (req, res) => {
 export const favoriteMenuItem = async (req, res) => {
   try {
     const { hotelId } = req.params;
+    const ownerId = req.user._id;
 
-    const favoriteMenus = await Menu.find({
-      hotel: hotelId,
-      rating: { $gte: 4 },
-    }).select("-__v -createdAt -updatedAt");
-
-    if (!favoriteMenus.length) {
-      return res.status(404).json({
+    const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId });
+    if (!hotel) {
+      return res.status(403).json({
         success: false,
-        message: "No favorite menus found for this hotel",
+        message: "Unauthorized access — you cannot view this hotel's favorites",
         data: [],
         errors: [],
       });
     }
 
+    const favoriteMenus = await Menu.find({
+      hotel: hotel._id,
+      rating: { $gte: 4 },
+    }).select("-__v -createdAt -updatedAt");
+
     return res.status(200).json({
       success: true,
-      message: "Favorite menus retrieved successfully",
+      message: favoriteMenus.length
+        ? "Favorite menus retrieved successfully"
+        : "No favorite menus found for this hotel",
       data: favoriteMenus,
       errors: [],
     });
-  } catch (errors) {
+  } catch (error) {
+    console.error("Favorite menu retrieval error:", error);
     return res.status(500).json({
       success: false,
-      error: "Server error",
+      message: "Server error",
       data: [],
-      errors: [errors.message],
+      errors: [error.message],
     });
   }
 };

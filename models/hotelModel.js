@@ -22,7 +22,11 @@ const hotelSchema = mongoose.Schema(
     ],
     vacancy: { type: String, default: "" },
     description: { type: String, default: "" },
-    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+    },
     rating: { type: Number, default: 0 },
     menus: [
       {
