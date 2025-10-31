@@ -8,6 +8,7 @@ import {
   updateMenuItem,
   deleteMenuItem,
   favoriteMenuItem,
+  getAllMenuOfMyHotel,
 } from "../controller/menuController.js";
 import {
   createMenuValidator,
@@ -60,6 +61,13 @@ route.delete(
   validate(deleteMenuValidator),
   checkOwnerRole,
   deleteMenuItem
+);
+
+route.get(
+  "/owner/all-menus",
+  isAuthenticated,
+  checkOwnerRole,
+  getAllMenuOfMyHotel
 );
 
 export default route;

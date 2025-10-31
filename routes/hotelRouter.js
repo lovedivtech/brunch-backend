@@ -8,6 +8,7 @@ import {
 } from "../middleware/hotelValidetor.js";
 import {
   createHotel,
+  deleteHotel,
   updateHotel,
   ViewAllHotels,
   viewHotelDetails,
@@ -45,5 +46,7 @@ route.put(
   checkOwnerRole,
   updateHotel
 );
+
+route.delete("/hotel-delete/:id", isAuthenticated, checkOwnerRole, deleteHotel);
 
 export default route;

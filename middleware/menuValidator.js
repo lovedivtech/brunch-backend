@@ -1,5 +1,6 @@
 import * as yup from "yup";
 import Menu from "../models/menuModel.js";
+
 // Allowed cuisine types (same as in schema)
 const allowedTypes = [
   "punjabi",

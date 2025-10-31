@@ -256,3 +256,41 @@ export const favoriteMenuItem = async (req, res) => {
     });
   }
 };
+
+export const getAllMenuOfMyHotel = async (req, res) => {
+  try {
+    const ownerId = req.user._id;
+
+    const hotels = await Hotel.find({ owner: ownerId }).select(
+      "-__v -createdAt -updatedAt"
+    );
+
+    const menus = await Menu.find({
+      hotel: { $in: hotels.map((hotel) => hotel._id) },
+    }).select("-__v -createdAt -updatedAt");
+
+    if (hotels.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No menus found for this owner",
+        data: [],
+        errors: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Menus retrieved successfully",
+      data: menus,
+      errors: [],
+    });
+  } catch (error) {
+    console.error("Get all menu of my hotel error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      data: [],
+      errors: [error.message],
+    });
+  }
+};
