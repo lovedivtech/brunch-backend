@@ -216,7 +216,6 @@ export const favoriteMenuItem = async (req, res) => {
     const ownerId = req.user._id;
 
     const hotel = await Hotel.findOne({ _id: id, owner: ownerId });
-    console.log("Hotel found:", hotel);
 
     if (!hotel) {
       return res.status(403).json({
