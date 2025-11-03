@@ -181,29 +181,26 @@ export const deleteHotel = async (req, res) => {
     const { id } = req.params;
     const ownerId = req.user._id;
 
-    // 1️⃣ Check if hotel exists and belongs to this owner
-    const hotel = await Hotel.findByIdAndDelete({ _id: id, owner: ownerId });
-    if (!hotel)
+    // 1️⃣ Check ownership
+    const hotel = await Hotel.findOne({ _id: id, owner: ownerId });
+    if (!hotel) {
       return res.status(404).json({
         success: false,
-        message: "Hotel not found or you are not authorized to delete it",
-        data: [],
-        errors: [],
-      });
-    const menus = await Menu.find({ hotel: id });
-    if (menus.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot delete a hotel with associated menus",
+        message: "Hotel not found or unauthorized access",
         data: [],
         errors: [],
       });
     }
-    await menus.deleteMany({ hotel: id });
+
+    // 2️⃣ Delete all menus associated with this hotel
+    await Menu.deleteMany({ hotel: id });
+
+    // 3️⃣ Delete the hotel
+    await Hotel.findByIdAndDelete(id);
 
     return res.status(200).json({
       success: true,
-      message: "Hotel deleted successfully & associated menus removed",
+      message: "Hotel and all associated menus deleted successfully",
       data: [],
       errors: [],
     });
