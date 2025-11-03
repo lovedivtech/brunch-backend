@@ -19,7 +19,6 @@ const route = express.Router();
 route.post(
   "/hotel-creation",
   isAuthenticated,
-
   checkOwnerRole,
   validate(createHotelvalidator),
   createHotel
@@ -29,6 +28,7 @@ route.get(
   "/hotel-description/:id",
   isAuthenticated,
   validate(viewHotelDetailsValidator),
+  checkOwnerRole,
   viewHotelDetails
 );
 
@@ -36,6 +36,7 @@ route.get(
   "/all-hotels",
   isAuthenticated,
   validate(viewHotelDetailsValidator),
+  checkOwnerRole,
   ViewAllHotels
 );
 
