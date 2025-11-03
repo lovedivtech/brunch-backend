@@ -19,50 +19,59 @@ import {
 } from "../middleware/menuValidator.js";
 
 const route = express.Router();
+
+// ✅ Create a new menu item
 route.post(
-  "/hotel/:id/menu-creation",
+  "/hotel/:hotelId/menu-creation",
   isAuthenticated,
   validate(createMenuValidator),
   checkOwnerRole,
   createMenuItem
 );
 
+// ✅ Get all menus of a specific hotel (owned by user)
 route.get(
-  "/hotel/:id/all-menus",
+  "/hotel/:hotelId/all-menus",
   isAuthenticated,
   validate(viewAllMenuValidator),
   getAllMenuItem
 );
+
+// ✅ Get favorite menus (rating >= 4)
 route.get(
-  "/hotel/:id/favorite-menus",
+  "/hotel/:hotelId/favorite-menus",
   isAuthenticated,
   checkOwnerRole,
   favoriteMenuItem
 );
 
+// ✅ Get single menu item by ID
 route.get(
-  "/hotel/menu/:id",
-  validate(viewSingleMenuValidator),
+  "/hotel/menu/:menuId",
   isAuthenticated,
+  validate(viewSingleMenuValidator),
   getSingleMenuItem
 );
 
+// ✅ Update a menu item
 route.put(
-  "/hotel/:id/menu-update/:id",
+  "/hotel/:hotelId/menu-update/:menuId",
   isAuthenticated,
   validate(updateMenuValidator),
   checkOwnerRole,
   updateMenuItem
 );
 
+// ✅ Delete a menu item
 route.delete(
-  "/hotel/:hotelId/menus-delete/:menuId",
+  "/hotel/:hotelId/menu-delete/:menuId",
   isAuthenticated,
   validate(deleteMenuValidator),
   checkOwnerRole,
   deleteMenuItem
 );
 
+// ✅ Get all menus from all hotels owned by the owner
 route.get(
   "/owner/all-menus",
   isAuthenticated,

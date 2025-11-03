@@ -2,12 +2,12 @@ import Hotel from "../models/hotelModel.js";
 import Menu from "../models/menuModel.js";
 import { ApiFeatures } from "../utils/apiFunctionality.js";
 
+// ✅ CREATE MENU ITEM
 export const createMenuItem = async (req, res) => {
   try {
     const ownerId = req.user._id;
-    const { id: hotelId } = req.params;
+    const { hotelId } = req.params;
 
-    // ✅ Ensure hotel belongs to the current owner
     const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId }).select(
       "-__v -createdAt -updatedAt"
     );
@@ -20,10 +20,7 @@ export const createMenuItem = async (req, res) => {
       });
     }
 
-    // ✅ Create menu item
     const menu = await Menu.create({ ...req.body, hotel: hotel._id });
-
-    // ✅ Add menu reference in hotel document
     hotel.menus.push(menu._id);
     await hotel.save();
 
@@ -44,10 +41,11 @@ export const createMenuItem = async (req, res) => {
   }
 };
 
+// ✅ GET ALL MENUS FOR A HOTEL
 export const getAllMenuItem = async (req, res) => {
   try {
     const ownerId = req.user._id;
-    const { id: hotelId } = req.params;
+    const { hotelId } = req.params;
 
     const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId }).select(
       "_id"
@@ -89,16 +87,21 @@ export const getAllMenuItem = async (req, res) => {
   }
 };
 
+// ✅ GET SINGLE MENU ITEM
 export const getSingleMenuItem = async (req, res) => {
   try {
     const ownerId = req.user._id;
-    const { id } = req.params;
+    const { menuId } = req.params;
 
-    const menu = await Menu.findById(id)
+    const menu = await Menu.findById(menuId)
       .populate("hotel", "owner name")
       .select("-__v -createdAt -updatedAt");
 
-    if (!menu || menu.hotel.owner.toString() !== ownerId.toString()) {
+    if (
+      !menu ||
+      !menu.hotel ||
+      menu.hotel.owner.toString() !== ownerId.toString()
+    ) {
       return res.status(404).json({
         success: false,
         message: "Menu not found or unauthorized access",
@@ -124,13 +127,18 @@ export const getSingleMenuItem = async (req, res) => {
   }
 };
 
+// ✅ UPDATE MENU ITEM
 export const updateMenuItem = async (req, res) => {
   try {
     const ownerId = req.user._id;
-    const { id } = req.params;
+    const { menuId } = req.params;
 
-    const menu = await Menu.findById(id).populate("hotel", "owner");
-    if (!menu || menu.hotel.owner.toString() !== ownerId.toString()) {
+    const menu = await Menu.findById(menuId).populate("hotel", "owner");
+    if (
+      !menu ||
+      !menu.hotel ||
+      menu.hotel.owner.toString() !== ownerId.toString()
+    ) {
       return res.status(403).json({
         success: false,
         message: "You are not authorized to update this menu",
@@ -139,11 +147,10 @@ export const updateMenuItem = async (req, res) => {
       });
     }
 
-    const updatedMenu = await Menu.findByIdAndUpdate(id, req.body, {
+    const updatedMenu = await Menu.findByIdAndUpdate(menuId, req.body, {
       new: true,
       runValidators: true,
-      select: "-__v -createdAt -updatedAt",
-    });
+    }).select("-__v -createdAt -updatedAt");
 
     return res.status(200).json({
       success: true,
@@ -162,6 +169,7 @@ export const updateMenuItem = async (req, res) => {
   }
 };
 
+// ✅ DELETE MENU ITEM
 export const deleteMenuItem = async (req, res) => {
   try {
     const { menuId, hotelId } = req.params;
@@ -190,7 +198,6 @@ export const deleteMenuItem = async (req, res) => {
       });
     }
 
-    // Remove menu reference from hotel
     await Hotel.findByIdAndUpdate(hotelId, { $pull: { menus: menuId } });
 
     return res.status(200).json({
@@ -210,13 +217,13 @@ export const deleteMenuItem = async (req, res) => {
   }
 };
 
+// ✅ GET FAVORITE MENUS
 export const favoriteMenuItem = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { hotelId } = req.params;
     const ownerId = req.user._id;
 
-    const hotel = await Hotel.findOne({ _id: id, owner: ownerId });
-
+    const hotel = await Hotel.findOne({ _id: hotelId, owner: ownerId });
     if (!hotel) {
       return res.status(403).json({
         success: false,
@@ -257,19 +264,17 @@ export const favoriteMenuItem = async (req, res) => {
   }
 };
 
+// ✅ GET ALL MENUS FOR ALL HOTELS OWNED BY OWNER
 export const getAllMenuOfMyHotel = async (req, res) => {
   try {
     const ownerId = req.user._id;
-
-    const hotels = await Hotel.find({ owner: ownerId }).select(
-      "-__v -createdAt -updatedAt"
-    );
+    const hotels = await Hotel.find({ owner: ownerId }).select("_id");
 
     const menus = await Menu.find({
-      hotel: { $in: hotels.map((hotel) => hotel._id) },
+      hotel: { $in: hotels.map((h) => h._id) },
     }).select("-__v -createdAt -updatedAt");
 
-    if (hotels.length === 0) {
+    if (menus.length === 0) {
       return res.status(404).json({
         success: false,
         message: "No menus found for this owner",

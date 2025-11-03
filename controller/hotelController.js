@@ -1,4 +1,5 @@
 import Hotel from "../models/hotelModel.js";
+import Menu from "../models/menuModel.js";
 
 export const createHotel = async (req, res) => {
   try {
@@ -181,23 +182,28 @@ export const deleteHotel = async (req, res) => {
     const ownerId = req.user._id;
 
     // 1️⃣ Check if hotel exists and belongs to this owner
-    const hotel = await Hotel.findOne({ _id: id, owner: ownerId });
-
-    if (!hotel) {
+    const hotel = await Hotel.findByIdAndDelete({ _id: id, owner: ownerId });
+    if (!hotel)
       return res.status(404).json({
         success: false,
         message: "Hotel not found or you are not authorized to delete it",
         data: [],
         errors: [],
       });
+    const menus = await Menu.find({ hotel: id });
+    if (menus.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete a hotel with associated menus",
+        data: [],
+        errors: [],
+      });
     }
-
-    // 2️⃣ Perform delete
-    await Hotel.findByIdAndDelete(id);
+    await menus.deleteMany({ hotel: id });
 
     return res.status(200).json({
       success: true,
-      message: "Hotel deleted successfully",
+      message: "Hotel deleted successfully & associated menus removed",
       data: [],
       errors: [],
     });
