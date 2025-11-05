@@ -268,11 +268,20 @@ export const favoriteMenuItem = async (req, res) => {
 export const getAllMenuOfMyHotel = async (req, res) => {
   try {
     const ownerId = req.user._id;
-    const hotels = await Hotel.find({ owner: ownerId }).select("_id");
+    const hotels = await Hotel.find({ owner: ownerId }).select("_id name");
 
-    const menus = await Menu.find({
-      hotel: { $in: hotels.map((h) => h._id) },
-    }).select("-__v -createdAt -updatedAt");
+    const hotelIds = hotels.map((h) => h._id);
+
+    const baseQuery = Menu.find({
+      hotel: { $in: hotelIds },
+    }).populate({ path: "hotel", select: "name" });
+
+    const features = new ApiFeatures(baseQuery, req.query)
+      .filter()
+      .sort()
+      .paginate();
+
+    const menus = await features.query;
 
     if (menus.length === 0) {
       return res.status(404).json({
@@ -286,7 +295,14 @@ export const getAllMenuOfMyHotel = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Menus retrieved successfully",
-      data: menus,
+      data: menus.map((menu) => ({
+        _id: menu._id,
+        name: menu.name,
+        price: menu.price,
+        type: menu.type,
+        category: menu.category,
+        hotelName: menu.hotel?.name || "Unknown",
+      })),
       errors: [],
     });
   } catch (error) {
