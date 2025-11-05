@@ -49,7 +49,7 @@ export const viewHotelDetails = async (req, res) => {
   try {
     const { id } = req.params; // hotel ID from URL
     const ownerId = req.user._id;
-    console.log(ownerId); // logged-in owner from auth middleware
+    // logged-in owner from auth middleware
 
     //  Find hotel by ID and ensure it belongs to this owner
     const hotel = await Hotel.findOne({ _id: id, owner: ownerId })

@@ -133,8 +133,6 @@ export const deleteImage = async (req, res) => {
     const { id: imageId } = req.params;
     const { type } = req.query;
 
-    console.log("Received delete image request:", { imageId, type });
-
     if (!imageId || !type) {
       return res.status(400).json({
         success: false,
