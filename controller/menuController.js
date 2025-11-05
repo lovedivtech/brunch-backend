@@ -306,7 +306,7 @@ export const getAllMenuOfMyHotel = async (req, res) => {
         rating: menu.rating,
         type: menu.type,
         available: menu.available,
-        image: menu.image,
+        images: menu.images,
         hotel: menu.hotel?._id,
         hotelName: menu.hotel?.name || "Unknown",
       })),
