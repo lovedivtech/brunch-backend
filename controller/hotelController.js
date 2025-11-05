@@ -67,7 +67,7 @@ export const viewHotelDetails = async (req, res) => {
     }
 
     const hotelData = {
-      id: hotel._id,
+      _id: hotel._id,
       name: hotel.name,
       openingTime: hotel.openingTime,
       closingTime: hotel.closingTime,
