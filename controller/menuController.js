@@ -294,13 +294,20 @@ export const getAllMenuOfMyHotel = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Menus retrieved successfully",
+      message: `${menus.length} Menus retrieved successfully`,
       data: menus.map((menu) => ({
         _id: menu._id,
         name: menu.name,
+        description: menu.description,
         price: menu.price,
-        type: menu.type,
+        offer: menu.offer,
         category: menu.category,
+        reviewCount: menu.reviewCount,
+        rating: menu.rating,
+        type: menu.type,
+        available: menu.available,
+        image: menu.image,
+        hotel: menu.hotel?._id,
         hotelName: menu.hotel?.name || "Unknown",
       })),
       errors: [],
