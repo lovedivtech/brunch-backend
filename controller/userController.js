@@ -1,4 +1,6 @@
 import User from "../models/userModel.js";
+import Hotel from "../models/hotelModel.js";
+import Menu from "../models/menuModel.js";
 import { JWTSignVerifyUserData } from "../utils/jwtToken.js";
 import {
   ramdomUserName,
@@ -9,6 +11,7 @@ import {
 } from "../utils/services.js";
 
 import sendEmail from "../config/sendEmail.js";
+import { ApiFeatures } from "../utils/apiFunctionality.js";
 
 /////////////////////  1️⃣ SIGNUP USER  ////////////////////////////////////
 
@@ -138,7 +141,7 @@ export const resetPWD = async (req, res, next) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired token",
+        message: "Invalid Or Expired Reset-Token",
         errors: [],
         user: [],
       });
@@ -157,7 +160,7 @@ export const resetPWD = async (req, res, next) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: `resetPsssword Error 💥`,
+      message: `Reset-Passsword Error 💥`,
       error: [],
       data: [],
     });
@@ -292,3 +295,104 @@ export const updateUserProfile = async (req, res, next) => {
     });
   }
 };
+
+export const userViewAllHotels = async (req, res, next) => {
+  try {
+    const baseQuery = Hotel.find({}).select("-__v -createdAt -updatedAt");
+    if (!baseQuery) {
+      return res.status(404).json({
+        success: false,
+        message: "Hotels Are Not Available 🙇🏻🙇🏻‍♀️",
+        data: [],
+        errors: [],
+      });
+    }
+
+    const features = new ApiFeatures(baseQuery, req.query)
+      .filter()
+      .sort()
+      .paginate();
+
+    const hotels = await features.query;
+    if (hotels.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Hotels Are Not Found 🙇🏻🙇🏻‍♀️",
+        data: [],
+        errors: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `(${hotels.length}) Hotels fetched successfully`,
+      data: hotels,
+      error: [],
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: [error.message],
+      data: [],
+    });
+  }
+};
+
+export const userViewHotelMenu = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const hotel = Hotel.find({ _id: id }).select("-__v -createdAt -updatedAt");
+    if (!hotel) {
+      return res.status(404).json({
+        success: false,
+        message: "Hotels Are Not found 💥",
+        data: [],
+        errors: [],
+      });
+    }
+
+    const baseQuery = Menu.find({ hotel: id }).select(
+      "-__v -createdAt -updatedAt"
+    );
+    if (!baseQuery) {
+      return res.status(404).json({
+        success: false,
+        message: "Menu Not Available 🙇🏻🙇🏻‍♀️",
+        data: [],
+        errors: [],
+      });
+    }
+    const features = new ApiFeatures(baseQuery, req.query)
+      .filter()
+      .sort()
+      .paginate();
+
+    const menus = await features.query;
+    if (menus.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "menuItems Are Not Found 🙇🏻🙇🏻‍♀️",
+        data: [],
+        errors: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `(${menus.length}) MenuItems fetched successfully`,
+      data: menus,
+      error: [],
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: [error.message],
+      data: [],
+    });
+  }
+};
+// 69085c2f298f5adaba7983b4
+// 69085c26298f5adaba7983af
+// 69085bdf298f5adaba7983a6

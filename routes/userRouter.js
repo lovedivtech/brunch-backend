@@ -9,6 +9,8 @@ import {
   updatePWD,
   getUserProfile,
   updateUserProfile,
+  userViewAllHotels,
+  userViewHotelMenu,
 } from "../controller/userController.js";
 
 import {
@@ -35,5 +37,11 @@ route.put(
 
 route.get("/profile", isAuthenticated, getUserProfile);
 route.put("/update-profile", isAuthenticated, updateUserProfile);
+
+// TODO :  //////////////////////// user hotels And menu routes ////////////////////////////
+
+route.get("/view-hotels", userViewAllHotels);
+
+route.get("/view-hotel/:id/menu", userViewHotelMenu);
 
 export default route;

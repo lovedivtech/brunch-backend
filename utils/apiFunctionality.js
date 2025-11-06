@@ -22,9 +22,21 @@ export class ApiFeatures {
     if (queryObj.type) {
       filter.type = queryObj.type;
     }
+    //country
+    if (queryObj.country) {
+      filter.country = { $regex: queryObj.country, $options: "i" };
+    }
     // Name (partial match)
     if (queryObj.name) {
       filter.name = { $regex: queryObj.name, $options: "i" };
+    }
+    // Rating
+    if (queryObj.rating) {
+      filter.rating = Number(queryObj.rating);
+    }
+    // offer
+    if (queryObj.offer) {
+      filter.offer = Number(queryObj.offer);
     }
     // Category
     if (queryObj.category) {
