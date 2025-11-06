@@ -7,6 +7,8 @@ import {
   forgotPWD,
   resetPWD,
   updatePWD,
+  getUserProfile,
+  updateUserProfile,
 } from "../controller/userController.js";
 
 import {
@@ -28,5 +30,10 @@ route.put(
   validate(updatePWDValidator),
   updatePWD
 );
+
+// TODO :  //////////////////////// User Profile Routes ////////////////////////////
+
+route.get("/profile", isAuthenticated, getUserProfile);
+route.put("/update-profile", isAuthenticated, updateUserProfile);
 
 export default route;

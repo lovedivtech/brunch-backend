@@ -125,3 +125,26 @@ export const updatePWDValidator = Yup.object().shape({
     .required("Confirm password is required")
     .oneOf([Yup.ref("password"), null], "Passwords must match"),
 });
+
+export const updateUserValidator = Yup.object().shape({
+  firstName: Yup.string().required("First name is required"),
+
+  lastName: Yup.string().required("Last name is required"),
+
+  email: Yup.string()
+    .required("Email is required")
+    .matches(emailRegex, "Email is invalid")
+    .test("email-unique", "Email already exists", async (value) => {
+      if (!value) return false;
+      const existingUser = await User.findOne({ email: value });
+      return !existingUser;
+    }),
+
+  phoneNo: Yup.string()
+    .notRequired()
+    .test(
+      "is-valid-phone",
+      "Phone number is invalid",
+      (value) => !value || phoneNoRegex.test(value)
+    ),
+});

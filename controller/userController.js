@@ -1,10 +1,5 @@
-import { ValidationError } from "yup";
 import User from "../models/userModel.js";
-import {
-  decodeToken,
-  JWTToken,
-  JWTSignVerifyUserData,
-} from "../utils/jwtToken.js";
+import { JWTSignVerifyUserData } from "../utils/jwtToken.js";
 import {
   ramdomUserName,
   generateHashPassword,
@@ -197,6 +192,102 @@ export const updatePWD = async (req, res, next) => {
       success: false,
       message: `resetPsssword Error 💥`,
       error: [],
+      data: [],
+    });
+  }
+};
+
+// TODO  /////////////////////  5️⃣ GET USER PROFILE   ////////////////////////////////////
+export const getUserProfile = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+        error: [],
+        data: [],
+      });
+    }
+    const userData = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phoneNo: user.phoneNo,
+      username: user.username,
+      role: user.role,
+      license: user.license,
+      gstNo: user.gstNo,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "User profile fetched successfully",
+      data: userData,
+      error: [],
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: [error.message],
+      data: [],
+    });
+  }
+};
+
+// TODO  /////////////////////  6️⃣ UPDATE USER PROFILE   ////////////////////////////////////
+export const updateUserProfile = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { firstName, lastName, email, phoneNo } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        email,
+        phoneNo,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+        error: [],
+        data: [],
+      });
+    }
+    const userData = await JWTSignVerifyUserData(user);
+    return res.status(200).json({
+      success: true,
+      message: "User profile updated successfully",
+      data: {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phoneNo: userData.phoneNo,
+        username: userData.username,
+        role: userData.role,
+        token: userData.token,
+        license: userData.license,
+        gstNo: userData.gstNo,
+      },
+      error: [],
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: [error.message],
       data: [],
     });
   }
