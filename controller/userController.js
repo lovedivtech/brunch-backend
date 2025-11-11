@@ -172,7 +172,8 @@ export const updatePWD = async (req, res, next) => {
   try {
     const { oldPassword, password, confirmPassword } = req.body;
 
-    const user = await User.findById(req.user.id).select("+password");
+    const user = await User.findById(req.user._id).select("+password");
+
     const isMatch = await compareHashPassword(oldPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({
@@ -187,13 +188,15 @@ export const updatePWD = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: `password Updated Successfully`,
-      user: [user._id, user.username, user.email],
+      user: {
+        _id: user._id,
+      },
       error: [],
     });
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: `resetPsssword Error 💥`,
+      message: `reset-Password Error 💥`,
       error: [],
       data: [],
     });
